@@ -14,8 +14,9 @@ with open("ninety_nine.key") as f:
 
 class Player:
 
-    def __init__(self, name):
+    def __init__(self, name, user):
         self.name = name
+        self.user = user
         self.cards = []
 
     def __len__(self):
@@ -37,9 +38,11 @@ class NinetyNineBot:
         self.players = {}
         self.player_id_list = []
 
-    def add_player(self, id, name):
+    def add_player(self, user):
         """Adds this player to the game."""
-        self.players[id] = Player(name)
+        id = user.id
+        name = user.name
+        self.players[id] = Player(name, user)
         self.player_id_list.append(id)
 
     def draw(self, id):
@@ -65,19 +68,49 @@ class NinetyNineBot:
             s += "{} has {} cards.\n".format(name, cards)
         return s[:-1]
 
+    def next_player(self, id):
+        """Finds the next player after name for player turn order. Return's that
+        player's user"""
+        index = self.player_id_list.index(id)
+        next_index = (index + 1) % len(self.player_id_list)
+        return self.players[self.player_id_list[next_index]].user
+
+#########################################################
+### Setting up NNB and on_ready
+#########################################################
 
 NNB = NinetyNineBot()
-
 
 @client.event
 async def on_ready():
     """ Displayed in the terminal when the bot is logged in. """
+    # channel = client.get_channel(695669957891194952)
+    # await channel.send("Who wants to play The Game of 99?")
     print("Who wants to play The Game of 99?")
+
+#########################################################
+### Helper functions that aren't commands
+#########################################################
+
+async def next_player_message(ctx):
+    """Used to tell who is the next player. Argument is context from which next
+    player can be determined."""
+    message = "It is now {}'s turn.".format(NNB.next_player(ctx.message.author.id).mention)
+    await ctx.send(message)
+
+async def cards_per_hand(ctx):
+    """Used to tell number of cards in each hand."""
+    message = NNB.cards_per_hand()
+    await ctx.send(message)
+
+#########################################################
+### Commands
+#########################################################
 
 @client.command(aliases=['join'])
 async def _99join(ctx):
     """Adds this player to the game."""
-    NNB.add_player(ctx.message.author.id, ctx.message.author.name)
+    NNB.add_player(ctx.message.author)
     await ctx.send("Welcome to the game, {}".format(ctx.message.author.name))
     print("Added {} to the game.".format(ctx.message.author.name))
 
@@ -91,8 +124,11 @@ async def _99draw(ctx):
     print(ctx.message.author.name, "drew a card.")
 
     # Say number of cards in each hand
-    message = NNB.cards_per_hand()
-    await ctx.send(message)
+    await cards_per_hand(ctx)
+
+    # Say next player's turn
+    await next_player_message(ctx)
+
 
 @client.command(aliases=['play'])
 async def _99play(ctx, card):
@@ -111,8 +147,10 @@ async def _99play(ctx, card):
         print(ctx.message.author.name, "played the card", card)
 
         # Say number of cards in each hand
-        message = NNB.cards_per_hand()
-        await ctx.send(message)
+        await cards_per_hand(ctx)
+
+        # Say next player's turn
+        await next_player_message(ctx)
 
     else:
         await ctx.send("Sorry {}, you do not have card {} in your hand.".format(ctx.message.author.name, card))
