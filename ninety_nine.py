@@ -1,5 +1,8 @@
 """
 Bot to implement Game of 99
+
+To do:
+- pickle the contents of NNB after every play so I could resume a crashed game.
 """
 
 import discord
@@ -9,7 +12,7 @@ import random
 
 client = discord.ext.commands.Bot(command_prefix = '99')
 
-with open("ninety_nine.key") as f:
+with open("ninety_nine.key", "r") as f:
     auth_key = f.read().strip()
 
 class Player:
