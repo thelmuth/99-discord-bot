@@ -8,7 +8,6 @@ OR to unpickle a saved game:
 python3 ethnos_bot.py backup_ethnos_bot_DATETIME.dat
 
 To do:
-- count dragon cards, print message for each, draw another card, and on third DO THING
 """
 
 import discord
@@ -23,16 +22,21 @@ with open("ethnos.key", "r") as f:
 
 TRIBES = ["Centaur",
           "Dwarf",
-          "Elf",
+          # "Elf",
           "Giant",
-          "Halfling",
+          # "Halfling",
           # "Merfolk",
           # "Minotaur",
           # "Orc",
-          # "Skeleton",
-          # "Troll",
+          "Skeleton",
+          "Troll",
           # "Wingfolk",
-          "Wizard"]
+          "Wizard"
+          ]
+
+# random.shuffle(TRIBES)
+# print(TRIBES[:6])
+# 1 / 0
 
 COLORS = ["Red", "Green", "Blue", "Gray", "Purple", "Orange"]
 
@@ -72,6 +76,7 @@ class EthnosBot:
         random.shuffle(self.deck)
 
         self.started = False
+        self.dragons = 0
         self.players = {}
         self.player_id_list = []
         self.available_cards = []
@@ -129,7 +134,15 @@ class EthnosBot:
 
     def draw(self, id):
         """Draws a card, adds it to player id's hand, and returns it."""
-        card = self.deck.pop()
+        card = None
+
+        while len(self.deck) > 0:
+            card = self.deck.pop()
+            if card == "Dragon":
+                self.dragons += 1
+            else:
+                break
+
         self.players[id].add_card(card)
         return card
 
@@ -229,6 +242,14 @@ async def cards_per_hand(ctx):
     message = EB.cards_per_hand()
     await ctx.send(message)
 
+async def dragons(ctx):
+    """Checks number of Dragons drawn"""
+    message = f"{EB.dragons} Dragon cards have been drawn."
+    if EB.dragons == 3:
+        message = "==========================\n3 Dragon cards have been drawn! Round over!\n=========================="
+    await ctx.send(message)
+    return EB.dragons
+
 #########################################################
 ### Commands
 #########################################################
@@ -265,14 +286,18 @@ async def draw(ctx):
     await ctx.message.author.send("You draw the card {}, and your hand is {}.".format(card, hand))
     print(ctx.message.author.name, "drew a card.")
 
-    # Say number of cards in each hand
-    await cards_per_hand(ctx)
+    # Check dragons
+    await dragons(ctx)
 
-    # Available cards
-    await available_cards_message(ctx)
+    if EB.dragons < 3:
+        # Say number of cards in each hand
+        await cards_per_hand(ctx)
 
-    # Say next player's turn
-    await next_player_message(ctx)
+        # Available cards
+        await available_cards_message(ctx)
+
+        # Say next player's turn
+        await next_player_message(ctx)
 
 @client.command()
 async def pickup(ctx, color, tribe):
