@@ -172,6 +172,7 @@ class EthnosBot:
     def table_card(self, card):
         """Adds card to available cards."""
         self.available_cards.append(card)
+        self.available_cards.sort()
 
     def cards_per_hand(self):
         """Returns a string of the number of cards per hand for each player."""
@@ -244,7 +245,7 @@ async def cards_per_hand(ctx):
 
 async def dragons(ctx):
     """Checks number of Dragons drawn"""
-    message = f"{EB.dragons} Dragon cards have been drawn."
+    message = f"There are now {len(EB.deck)} cards in the deck.\n{EB.dragons} Dragon cards have been drawn."
     if EB.dragons == 3:
         message = "==========================\n3 Dragon cards have been drawn! Round over!\n=========================="
     await ctx.send(message)
