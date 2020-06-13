@@ -263,6 +263,7 @@ async def dragons(ctx):
     """Checks number of Dragons drawn"""
     if EB.drew_a_dragon():
         await ctx.send("**A Dragon card was drawn!!**")
+        await ctx.send(":dragon:")
 
     message = f"There are now {len(EB.deck)} cards in the deck.\n{EB.dragons} Dragon cards have been drawn."
 
