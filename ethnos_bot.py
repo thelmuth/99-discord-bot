@@ -78,6 +78,8 @@ class EthnosBot:
 
         self.started = False
         self.dragons = 0
+        self.just_drew_dragon
+
         self.players = {}
         self.player_id_list = []
         self.available_cards = []
@@ -141,6 +143,7 @@ class EthnosBot:
             card = self.deck.pop()
             if card == "Dragon":
                 self.dragons += 1
+                self.just_drew_dragon = True
             else:
                 break
 
@@ -179,6 +182,12 @@ class EthnosBot:
         """Removes card from available cards."""
         c = card.title()
         self.available_cards.remove(c)
+
+    def drew_a_dragon(self):
+        """Returns True if a Dragon was drawn. Resets self.just_drew_dragon to False"""
+        result = self.just_drew_dragon
+        self.just_drew_dragon = False
+        return result
 
     def cards_per_hand(self):
         """Returns a string of the number of cards per hand for each player."""
@@ -252,7 +261,11 @@ async def cards_per_hand(ctx):
 
 async def dragons(ctx):
     """Checks number of Dragons drawn"""
+    if EB.drew_a_dragon():
+        await ctx.send("**A Dragon card was drawn!!**")
+
     message = f"There are now {len(EB.deck)} cards in the deck.\n{EB.dragons} Dragon cards have been drawn."
+
     if EB.dragons == 3:
         message = "==========================\n3 Dragon cards have been drawn! Round over!\n=========================="
     await ctx.send(message)
