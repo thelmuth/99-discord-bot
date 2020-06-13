@@ -8,6 +8,7 @@ OR to unpickle a saved game:
 python3 ethnos_bot.py backup_ethnos_bot_DATETIME.dat
 
 To do:
+- !untable command
 """
 
 import discord
@@ -174,6 +175,11 @@ class EthnosBot:
         self.available_cards.append(card)
         self.available_cards.sort()
 
+    def untable_card(self, card):
+        """Removes card from available cards."""
+        c = card.title()
+        self.available_cards.remove(c)
+
     def cards_per_hand(self):
         """Returns a string of the number of cards per hand for each player."""
         s = ""
@@ -220,6 +226,7 @@ The following commands will be helpful in uncommon situations, and should be use
 - `!add color tribe` - Adds card with given card and tribe to your hand out of thin air.
 - `!discard color tribe` - Discards card with given card and tribe from your hand. _Does not_ put it in available cards
 - `!table color tribe` - Puts card with given card and tribe on the table out of thin air.
+- `!untable color tribe` - Removes card with given card and tribe from the table to nowhere.
 """
     await channel.send(commands)
 
@@ -436,6 +443,29 @@ async def table(ctx, color, tribe):
 async def table_error(ctx, error):
     if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
         await ctx.send("Please tell me which card to put on the table, as in `!table Red Dwarf` to put the card 'Red Dwarf' on the table.")
+
+@client.command()
+async def untable(ctx, color, tribe):
+    """Removes card from Table to thin air.
+    This should only be used for fixing erroneous situations."""
+    c = color.title()
+    t = tribe.title()
+    card = f"{c} {t}"
+    print(f"{ctx.message.author.name} is untabling the card {card}.")
+
+    if c not in COLORS or t not in TRIBES:
+        await ctx.send(f"Sorry, {card} is not a legal card name; check spelling.")
+    elif not EB.available(card):
+        await ctx.send(f"Sorry, {card} is not on the table.")
+    else:
+        EB.untable_card(card)
+        await available_cards_message(ctx)
+
+@untable.error
+async def untable_error(ctx, error):
+    if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
+        await ctx.send("Please tell me which card to remove from the table, as in `!untable Red Dwarf` to remove the card 'Red Dwarf' from the table.")
+
 
 @client.command(aliases=["pickle"])
 async def pickle_cards(ctx):
