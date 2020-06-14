@@ -369,8 +369,11 @@ async def band(ctx):
     print(f"{ctx.message.author.name} is forming a band.")
 
 
-    # Remove all cards from hand
+    # Remove all cards from hand and tell them about it
     EB.empty_hand(ctx.message.author.id)
+
+    hand = EB.hand(ctx.message.author.id)
+    await ctx.message.author.send("You just made a band, and your hand is {}.".format(card, hand))
 
     # Say number of cards in each hand
     await cards_per_hand(ctx)
