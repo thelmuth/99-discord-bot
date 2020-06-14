@@ -413,6 +413,8 @@ async def add(ctx, color, tribe):
     else:
         EB.add_card(ctx.message.author.id, card)
         await ctx.send(f"{ctx.message.author.name} added card {card} to their hand.")
+        hand = EB.hand(ctx.message.author.id)
+        await ctx.message.author.send("You add the card {}, and your hand is {}.".format(card, hand))
 
 @add.error
 async def add_error(ctx, error):
@@ -435,6 +437,8 @@ async def discard(ctx, color, tribe):
     else:
         EB.play(ctx.message.author.id, card)
         await ctx.send(f"{ctx.message.author.name} discarded card {card} from their hand.")
+        hand = EB.hand(ctx.message.author.id)
+        await ctx.message.author.send("You discard the card {}, and your hand is {}.".format(card, hand))
 
 @discard.error
 async def discard_error(ctx, error):
