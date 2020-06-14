@@ -78,7 +78,7 @@ class EthnosBot:
 
         self.started = False
         self.dragons = 0
-        self.just_drew_dragon
+        self.just_drew_dragon = False
 
         self.players = {}
         self.player_id_list = []
