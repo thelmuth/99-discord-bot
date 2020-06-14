@@ -268,7 +268,7 @@ async def dragons(ctx):
     message = f"There are now {len(EB.deck)} cards in the deck.\n{EB.dragons} Dragon cards have been drawn."
 
     if EB.dragons == 3:
-        message = "==========================\n3 Dragon cards have been drawn! Round over!\n=========================="
+        message = "==========================\n3 Dragon cards have been drawn! This Age is over!\n=========================="
     await ctx.send(message)
     return EB.dragons
 
